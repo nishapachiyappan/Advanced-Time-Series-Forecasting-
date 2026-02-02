@@ -1,0 +1,2 @@
+state_rmse = np.sqrt(mean_squared_error(X_true, X_est))
+print(f"\nHidden State Estimation RMSE: {state_rmse:.4f}")
