@@ -1,0 +1,13 @@
+kf = KalmanFilter(A, H, Q, R, x0, P0)
+
+X_est = []
+Y_pred_kf = []
+
+for t in range(T):
+    kf.predict()
+    x_upd = kf.update(Y_obs[t])
+    X_est.append(x_upd)
+    Y_pred_kf.append(H @ x_upd)
+
+X_est = np.array(X_est)
+Y_pred_kf = np.array(Y_pred_kf).reshape(-1, n_obs)
