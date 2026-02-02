@@ -1,0 +1,47 @@
+class KalmanFilter:
+    """
+    Implements a linear Kalman Filter:
+
+        Prediction:
+            x̂_t⁻ = A x̂_{t-1}
+            P_t⁻ = A P_{t-1} Aᵀ + Q
+
+        Update:
+            K_t = P_t⁻ Hᵀ (H P_t⁻ Hᵀ + R)⁻¹
+            x̂_t = x̂_t⁻ + K_t (y_t − H x̂_t⁻)
+            P_t = (I − K_t H) P_t⁻
+    """
+
+    def __init__(self, A, H, Q, R, x0, P0):
+        """
+        Parameters:
+        -----------
+        A : (n_states, n_states)
+        H : (n_obs, n_states)
+        Q : (n_states, n_states)
+        R : (n_obs, n_obs)
+        x0: (n_states,)
+        P0: (n_states, n_states)
+        """
+
+        self.A = A
+        self.H = H
+        self.Q = Q
+        self.R = R
+
+        self.x = x0        # Current state estimate (n_states,)
+        self.P = P0        # Current state covariance (n_states, n_states)
+
+    def predict(self):
+        """Time update (prior)."""
+        self.x = self.A @ self.x
+        self.P = self.A @ self.P @ self.A.T + self.Q
+        return self.x
+
+    def update(self, y):
+        """Measurement update (posterior)."""
+        S = self.H @ self.P @ self.H.T + self.R          # Innovation covariance (n_obs, n_obs)
+        K = self.P @ self.H.T @ np.linalg.inv(S)         # Kalman gain (n_states, n_obs)
+        self.x = self.x + K @ (y - self.H @ self.x)      # Updated state estimate
+        self.P = (np.eye(len(self.P)) - K @ self.H) @ self.P
+        return self.x
