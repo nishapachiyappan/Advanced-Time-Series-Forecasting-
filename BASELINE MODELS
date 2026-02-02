@@ -1,0 +1,27 @@
+def naive_persistence(y):
+    """
+    Baseline: ŷ_t = y_{t-1}
+    """
+    y_hat = np.zeros_like(y)
+    y_hat[1:] = y[:-1]
+    y_hat[0] = y[0]
+    return y_hat
+
+
+def var_forecast(y, train_frac=0.7):
+    """
+    Vector AutoRegression baseline.
+    y: (T, n_obs)
+    """
+    T = len(y)
+    split = int(train_frac * T)
+    train, test = y[:split], y[split:]
+
+    model = VAR(train)
+    results = model.fit(maxlags=5, ic="aic")
+    forecasts = results.forecast(train[-results.k_ar:], steps=len(test))
+
+    y_hat = np.zeros_like(y)
+    y_hat[:split] = train
+    y_hat[split:] = forecasts
+    return y_hat
