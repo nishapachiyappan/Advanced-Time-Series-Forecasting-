@@ -1,0 +1,35 @@
+def generate_ssm_data(T, A, H, Q, R, x0):
+    """
+    Generates data from a known linear Gaussian State Space Model.
+
+    Dimensions:
+    -----------
+    A : (n_states, n_states)  -> state transition matrix
+    H : (n_obs, n_states)     -> observation matrix
+    Q : (n_states, n_states)  -> process noise covariance
+    R : (n_obs, n_obs)        -> measurement noise covariance
+    x0: (n_states,)           -> initial hidden state
+
+    Returns:
+    --------
+    X_true : (T, n_states) -> true latent states
+    Y_obs  : (T, n_obs)    -> noisy observations
+    """
+
+    n_states = A.shape[0]
+    n_obs = H.shape[0]
+
+    X_true = np.zeros((T, n_states))
+    Y_obs = np.zeros((T, n_obs))
+
+    X_true[0] = x0
+
+    for t in range(1, T):
+        w_t = np.random.multivariate_normal(mean=np.zeros(n_states), cov=Q)
+        X_true[t] = A @ X_true[t-1] + w_t
+
+    for t in range(T):
+        v_t = np.random.multivariate_normal(mean=np.zeros(n_obs), cov=R)
+        Y_obs[t] = H @ X_true[t] + v_t
+
+    return X_true, Y_obs
